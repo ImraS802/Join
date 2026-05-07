@@ -9,14 +9,9 @@ import { ContactService } from '../../../shared/services/contact/contact.service
   templateUrl: './contact-list.html',
   styleUrl: './contact-list.scss',
 })
-export class ContactList{
+export class ContactList {
   contact_service = inject(ContactService);
-  contactList: Contact[] = this.contact_service.contactList;
   selectedIndex!: number;
-
-  constructor() {
-    this.contact_service;
-  }
 
   showContact(index: number) {
     this.selectedIndex = index;

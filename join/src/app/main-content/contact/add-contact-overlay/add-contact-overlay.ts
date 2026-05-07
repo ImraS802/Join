@@ -1,6 +1,5 @@
 import { Component, EventEmitter, inject, Output, ViewChild } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
-import { NgClass } from '@angular/common';
 import { ContactService } from '../../../shared/services/contact/contact.service';
 
 @Component({
@@ -10,7 +9,6 @@ import { ContactService } from '../../../shared/services/contact/contact.service
   styleUrl: './add-contact-overlay.scss',
 })
 export class AddContactOverlay {
-
   contact_service = inject(ContactService);
 
   isNewContactAdded = false;
@@ -21,18 +19,19 @@ export class AddContactOverlay {
   @ViewChild('phone') phone!: NgModel;
 
   contact = {
-    surname: "",
-    lastname: "",
-    mail: "",
-    phone: "",
-    color: "",
-  }
+    surname: '',
+    lastname: '',
+    mail: '',
+    phone: '',
+    color: '',
+    uid: '',
+  };
 
   submitContact() {
     if (this.checkCorrectInput()) {
       this.checkInputs();
       this.contact.color = this.contact_service.getRandomColor();
-      this.contact_service.addContactToDatabase(this.contact);
+      this.contact_service.addContactToDatabase(this.contact, true);
       this.clearInputs();
       this.isNewContactAdded = true;
       this.callCloseOverlay();
@@ -52,12 +51,11 @@ export class AddContactOverlay {
   }
 
   correctInput(data: string) {
-    let cache: string = "";
+    let cache: string = '';
     for (let i = 0; i < data.length; i++) {
       if (i == 0) {
         cache += data.charAt(i).toUpperCase();
-      }
-      else {
+      } else {
         cache += data.charAt(i).toLowerCase();
       }
     }
@@ -85,12 +83,13 @@ export class AddContactOverlay {
 
   clearInputs() {
     this.contact = {
-      surname: "",
-      lastname: "",
-      mail: "",
-      phone: "",
-      color: "",
-    }
+      surname: '',
+      lastname: '',
+      mail: '',
+      phone: '',
+      color: '',
+      uid: '',
+    };
   }
 
   stopPropagation(event: Event) {

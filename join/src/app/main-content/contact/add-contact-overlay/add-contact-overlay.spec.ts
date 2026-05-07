@@ -8,9 +8,8 @@ describe('AddContactOverlay', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AddContactOverlay]
-    })
-    .compileComponents();
+      imports: [AddContactOverlay],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AddContactOverlay);
     component = fixture.componentInstance;

@@ -38,7 +38,6 @@ h1 {
   padding-top: 16px;
   padding-left: 8px;
   margin-bottom: 16px;
-  font-family: sans-serif;
 }
 
 span {
@@ -190,6 +189,9 @@ mat-datepicker-toggle {
 
 #assigned_worker_input {
   width: 100%;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 #assigned_dropdown {

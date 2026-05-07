@@ -2,27 +2,21 @@ import { Component, inject, ElementRef, HostListener } from '@angular/core';
 import { EditContactOverlay } from '../../edit-contact-overlay/edit-contact-overlay';
 import { ContactService } from '../../../shared/services/contact/contact.service';
 
-
-
 @Component({
   selector: 'app-contact-details',
   imports: [EditContactOverlay],
   templateUrl: './contact-details.html',
   styleUrl: './contact-details.scss',
 })
-
 export class ContactDetails {
-contact_service = inject(ContactService)
+  contact_service = inject(ContactService);
 
   burgerOpen = false;
 
   hoverEdit = false;
   hoverDelete = false;
 
-  constructor(private eRef: ElementRef) {
-    this.contact_service;
-  }
-
+  constructor(private eRef: ElementRef) {}
 
   toggleBurger() {
     this.burgerOpen = !this.burgerOpen;

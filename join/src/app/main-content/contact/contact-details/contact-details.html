@@ -12,7 +12,8 @@
                 <span>{{contact_service.initials}}</span>
             </div>
             <div>
-                <span>{{contact_service.currentContact.surname}} </span> <span>{{contact_service.currentContact.lastname}}</span>
+                <span>{{contact_service.currentContact.surname}} </span>
+                <span>{{contact_service.currentContact.lastname}}</span>
                 <div id="contact_details_button">
                     <button (mouseover)="hoverEdit = true" (mouseleave)="hoverEdit = false"
                         (click)="contact_service.editContact(contact_service.currentIndex)">
@@ -28,7 +29,8 @@
         <h3>Contact Information</h3>
         <div>
             <h4>Email</h4>
-            <a class="email" href="mailto:{{contact_service.currentContact.mail}}">{{contact_service.currentContact.mail}}</a>
+            <a class="email"
+                href="mailto:{{contact_service.currentContact.mail}}">{{contact_service.currentContact.mail}}</a>
         </div>
         <div>
             <h4>Phone</h4>

@@ -8,12 +8,11 @@ import {
   moveItemInArray,
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
-import { Timestamp } from '@angular/fire/firestore';
 import { BoardService } from '../../shared/services/board/board.service';
 import { CardDetails } from './board-card/card-details/card-details';
-import { ContactService } from '../../shared/services/contact/contact.service';
-import { AddTask } from "../add-task/add-task";
+import { AddTask } from '../add-task/add-task';
 import { Router } from '@angular/router';
+import { ContactService } from '../../shared/services/contact/contact.service';
 
 @Component({
   selector: 'app-board',
@@ -30,42 +29,31 @@ export class Board {
   private router = inject(Router);
   @ViewChild('taskRef') task!: AddTask;
 
-  constructor() {
-    this.init();
-  }
-
   columnsTitel: ColumnCategory[] = ['To do', 'In progress', 'Await feedback', 'Done'];
   filteredTasks: Task[] = [];
   isVisible: boolean = false;
   isDragging: boolean = false;
 
-  async init() {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    this.renderTasks();
-  }
-
-  renderTasks() {
-    console.log(this.board_service.taskList[0].id);
-  }
-
   searchTask(keyWord: string) {
     if (keyWord.trim() === '') {
-      this.filteredTasks = this.board_service.taskList;
-    }
-    else {
+      this.filteredTasks = this.board_service.taskList();
+    } else {
       keyWord = keyWord.toLowerCase();
-      this.filteredTasks = this.board_service.taskList.filter(task =>
-        task.title.toLowerCase().includes(keyWord) ||
-        task.description.toLowerCase().includes(keyWord)
-      );
+      this.filteredTasks = this.board_service
+        .taskList()
+        .filter(
+          (task) =>
+            task.title.toLowerCase().includes(keyWord) ||
+            task.description.toLowerCase().includes(keyWord),
+        );
     }
   }
 
-  openAddTaskComponent(){
+  openAddTaskComponent() {
     this.router.navigate(['/add-task']);
   }
 
-  showAddTaskComponent(title:ColumnCategory) {
+  showAddTaskComponent(title: ColumnCategory) {
     if (!this.board_service.isAddTaskOpen) {
       this.board_service.setTaskColumnType(title);
       this.board_service.isAddTaskOpen = true;
@@ -76,8 +64,8 @@ export class Board {
 
   closeAddTaskComponent() {
     this.board_service.isAddTaskOpen = false;
-    this.task.resetForm();   
-    this.task.clearForm();    
+    this.task.resetForm();
+    this.task.clearForm();
   }
 
   stopPropagation(event: Event) {
@@ -121,7 +109,7 @@ export class Board {
         event.previousContainer.data,
         event.container.data,
         event.previousIndex,
-        event.currentIndex
+        event.currentIndex,
       );
       this.changeColumnType(columnTitle, task);
     }
@@ -132,21 +120,20 @@ export class Board {
   }
 
   onDragEnded(task: any) {
-    setTimeout(() => this.isDragging = false, 50);
+    setTimeout(() => (this.isDragging = false), 50);
   }
 
   changeColumnType(id: string, task: Task) {
-    const index = this.board_service.taskList.findIndex((t) => t.id === task.id);
+    const index = this.board_service.taskList().findIndex((t) => t.id === task.id);
     task.columnCategory = id as ColumnCategory;
     this.board_service.editTaskToDatabase(index, task);
   }
 
   getTasksForColumn(title: string) {
     if (this.filteredTasks.length > 0) {
-      return this.filteredTasks.filter(task => task.columnCategory === title);
-    }
-    else {
-      return this.board_service.taskList.filter(t => t.columnCategory === title);
+      return this.filteredTasks.filter((task) => task.columnCategory === title);
+    } else {
+      return this.board_service.taskList().filter((t) => t.columnCategory === title);
     }
   }
 

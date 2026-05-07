@@ -20,7 +20,7 @@
                             <img src="./assets/icons/person_gray.svg" alt="Person Icon" class="input-icon">
                         </div>
                         @if(!firstName.valid && firstName.touched) {
-                                <div class="error_msg"><span>Please enter a valid first name</span></div>
+                        <div class="error_msg"><span>Please enter a valid first name</span></div>
                         }
 
                         <div class="input-group">
@@ -28,9 +28,6 @@
                                 minlength="3" #lastName="ngModel" pattern="^[a-zA-Z\s]*$" required>
                             <img src="./assets/icons/person_gray.svg" alt="Person Icon" class="input-icon">
                         </div>
-                        @if(!lastName.valid && lastName.touched) {
-                        <div class="error_msg"><span>Please enter a valid last name</span></div>
-                        }
 
                         <div class="input-group">
                             <input name="mail" placeholder="Email" [(ngModel)]="contact.mail" type="text"
@@ -38,7 +35,7 @@
                             <img src="./assets/icons/mail_gray.svg" alt="Mail Icon" class="input-icon">
                         </div>
                         @if(!mail.valid && mail.touched) {
-                        <div class="error_msg"><span>Please enter a valid email address</span></div>
+                        <div class="error_msg"><span>Check your email and password. Please try again.</span></div>
                         }
 
                         <div class="input-group">
@@ -54,7 +51,8 @@
                             <button type="button" (click)="callCloseOverlay()" id="cancel_button">Cancel <img
                                     src="./assets/icons/close.svg" alt=""></button>
                             <button id="submit_button" type="submit"
-                                [disabled]="!contact.surname || !contact.lastname || !contact.mail || !contact.phone">Create contact <img src="./assets/icons/check.svg" alt=""></button>
+                                [disabled]="!contact.surname || !contact.lastname || !contact.mail || !contact.phone">Create
+                                contact <img src="./assets/icons/check.svg" alt=""></button>
                         </div>
                     </form>
                 </div>

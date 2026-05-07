@@ -1,8 +1,9 @@
 export interface Contact {
-  uid?: string;
+  id?: string;
   surname: string;
   lastname: string;
   mail: string;
   phone: string;
   color: string;
+  uid: string | undefined;
 }

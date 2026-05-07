@@ -14,58 +14,51 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-card-details',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatInputModule, 
-    MatDatepickerModule, 
+    CommonModule,
+    FormsModule,
+    MatInputModule,
+    MatDatepickerModule,
     MatNativeDateModule,
-    MatIconModule
+    MatIconModule,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './card-details.html',
   styleUrl: './card-details.scss',
 })
 export class CardDetails {
-  contact_service = inject(ContactService);
   board_service = inject(BoardService);
-  
+  contact_service = inject(ContactService);
+
   @Input() selectedTask: Task | null = null;
   @Input() isTaskDetailsOpen: boolean = false;
   @Output() close = new EventEmitter<void>();
 
-  // State
   isEditing = false;
-  editedTask: any = {}; // Kopie für das Formular
-  
-  // Edit UI States
-  workerDropdown = false;
-  subtaskInput = "";
+  editedTask: any = {};
 
-  // ##########################################
-  // # LOGIC: VIEW MODE
-  // ##########################################
+  workerDropdown = false;
+  subtaskInput = '';
 
   getPriorityIcon(priority?: string): string {
     if (!priority) return '';
     const p = priority.toLowerCase();
-    return `./assets/icons/prio_${p}.svg`;    
+    return `./assets/icons/prio_${p}.svg`;
   }
 
-  // Für die Edit-Buttons (Unterscheidung active/inactive Icons)
   getEditPriorityIcon(prio: string): string {
     const isActive = this.editedTask.priority === prio;
-    const path = isActive ? `prio_${prio.toLowerCase()}_white.svg` : `prio_${prio.toLowerCase()}.svg`;
-        console.log(this.selectedTask);
+    const path = isActive
+      ? `prio_${prio.toLowerCase()}_white.svg`
+      : `prio_${prio.toLowerCase()}.svg`;
 
     return `./assets/icons/${path}`;
-    
   }
 
   getInitials(name: string) {
-    if(!name) return '';
+    if (!name) return '';
     const parts = name.split(' ');
     let initials = parts[0].charAt(0);
-    if(parts.length > 1) initials += parts[1].charAt(0);
+    if (parts.length > 1) initials += parts[1].charAt(0);
     return initials.toUpperCase();
   }
 
@@ -75,7 +68,6 @@ export class CardDetails {
 
   getDueDate(date: any) {
     if (!date) return '';
-    // Konvertierung falls Timestamp
     const d = date.toDate ? date.toDate() : new Date(date);
     return d.toLocaleDateString('en-UK');
   }
@@ -83,28 +75,20 @@ export class CardDetails {
   toggleSubtaskStatus(sub: any, event: Event) {
     event.preventDefault();
     sub.status = !sub.status;
-    // Hier optional direkt speichern, falls gewünscht:
-    // this.board_service.updateTask(this.selectedTask);
+    this.saveTask();
   }
 
-  // ##########################################
-  // # LOGIC: EDIT MODE
-  // ##########################################
-
   startEditing() {
-    // 1. Deep Copy erstellen
     this.editedTask = JSON.parse(JSON.stringify(this.selectedTask));
-    
-    // 2. Datum für Datepicker vorbereiten (muss JS Date Object sein)
+
     if (this.editedTask.dueDate && this.editedTask.dueDate.seconds) {
-        // Fall: Firebase Timestamp
-        this.editedTask.dueDate = new Date(this.editedTask.dueDate.seconds * 1000);
+      this.editedTask.dueDate = new Date(this.editedTask.dueDate.seconds * 1000);
     } else if (typeof this.editedTask.dueDate === 'string') {
-        this.editedTask.dueDate = new Date(this.editedTask.dueDate);
+      this.editedTask.dueDate = new Date(this.editedTask.dueDate);
     }
-    
+
     this.isEditing = true;
-    this.workerDropdown = false; // Reset dropdown
+    this.workerDropdown = false;
   }
 
   cancelEdit() {
@@ -113,24 +97,15 @@ export class CardDetails {
   }
 
   saveTask() {
-    // Daten zurückschreiben
-    // Hinweis: Hier müsstest du ggf. das Date-Objekt wieder in einen Timestamp wandeln, 
-    // falls dein Service das erwartet.
-    
     Object.assign(this.selectedTask!, this.editedTask);
-    
-    // Service Update Call hier:
-    // this.board_service.updateTask(this.selectedTask).subscribe(...)
-    
+    this.board_service.editedTaskToDB(this.selectedTask!);
     this.isEditing = false;
   }
 
-  // --- Priority Logic ---
   setPriority(prio: string) {
     this.editedTask.priority = prio;
   }
 
-  // --- Assignee Dropdown Logic ---
   toggleDropdown() {
     this.workerDropdown = !this.workerDropdown;
   }
@@ -146,35 +121,34 @@ export class CardDetails {
 
     const index = this.editedTask.assignedTo.indexOf(fullname);
     if (index > -1) {
-      this.editedTask.assignedTo.splice(index, 1); // Entfernen
+      this.editedTask.assignedTo.splice(index, 1);
     } else {
-      this.editedTask.assignedTo.push(fullname); // Hinzufügen
+      this.editedTask.assignedTo.push(fullname);
     }
   }
 
-  // --- Subtask Edit Logic ---
   addSubtask() {
-    if(this.subtaskInput.trim()) {
-        if(!this.editedTask.subTask) this.editedTask.subTask = [];
-        this.editedTask.subTask.push({
-            id: Date.now().toString(), // Simple ID gen
-            subDescription: this.subtaskInput,
-            status: false
-        });
-        this.subtaskInput = '';
+    if (this.subtaskInput.trim()) {
+      if (!this.editedTask.subTask) this.editedTask.subTask = [];
+      this.editedTask.subTask.push({
+        id: Date.now().toString(),
+        subDescription: this.subtaskInput,
+        status: false,
+      });
+      this.subtaskInput = '';
     }
   }
 
   clearSubtaskInput() {
-    this.subtaskInput = "";
+    this.subtaskInput = '';
   }
 
   deleteSubtask(id: string) {
-    this.editedTask.subTask = this.editedTask.subTask.filter((s: { id: string; }) => s.id !== id);
+    this.editedTask.subTask = this.editedTask.subTask.filter((s: { id: string }) => s.id !== id);
   }
 
   editingState: Record<string, boolean> = {};
-  
+
   startEdit(id: string) {
     this.editingState[id] = true;
   }
@@ -182,10 +156,6 @@ export class CardDetails {
   stopEdit(id: string) {
     this.editingState[id] = false;
   }
-
-  // ##########################################
-  // # GENERAL ACTIONS
-  // ##########################################
 
   closeTaskDetails() {
     this.isEditing = false;

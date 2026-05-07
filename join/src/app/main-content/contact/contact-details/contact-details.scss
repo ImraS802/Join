@@ -91,7 +91,7 @@ button {
   border: none;
   cursor: pointer;
 
-  >img {
+  > img {
     width: 24px;
     height: 24px;
   }
@@ -105,7 +105,7 @@ button {
 #contact_details_button {
   display: flex;
   margin-top: 16px;
-  >button{
+  > button {
     width: 70px;
   }
 }
@@ -145,7 +145,7 @@ button {
   border-radius: 100px;
   cursor: pointer;
 
-  >img {
+  > img {
     width: 32px;
     height: 32px;
   }
@@ -168,7 +168,7 @@ button {
   flex-direction: column;
   justify-content: center;
 
-  >button {
+  > button {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -192,10 +192,6 @@ button {
     right: 16px;
   }
 }
-
-// .burger_menu_details.slide_out_burger {
-//   animation: slideOutBurger 0.4s ease-out forwards;
-// }
 
 @keyframes slideOutBurger {
   from {
@@ -272,9 +268,9 @@ app-edit-contact-overlay.slide_out_edit {
     display: block;
   }
 
- #contact_details_button {
-  margin-top: 8px;
- }
+  #contact_details_button {
+    margin-top: 8px;
+  }
 
   hr {
     position: relative;
@@ -331,20 +327,20 @@ app-edit-contact-overlay.slide_out_edit {
     top: 0;
     left: 0;
   }
-  
+
   #burger_edit {
     display: flex;
   }
-  
+
   #arrow_back.open {
     display: flex;
     cursor: pointer;
   }
-  
+
   #contact_details.open {
     display: flex;
     flex-direction: column;
-    
+
     #contact_details_button {
       display: none;
     }
@@ -356,4 +352,3 @@ app-edit-contact-overlay.slide_out_edit {
     aspect-ratio: 1/1;
   }
 }
-
