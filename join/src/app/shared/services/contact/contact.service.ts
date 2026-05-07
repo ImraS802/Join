@@ -1,37 +1,49 @@
-import { inject, Injectable } from '@angular/core';
-import { addDoc, collection, Firestore, onSnapshot, doc, deleteDoc, updateDoc } from '@angular/fire/firestore';
+import { inject, Injectable, signal } from '@angular/core';
+import {
+  addDoc,
+  collection,
+  Firestore,
+  onSnapshot,
+  doc,
+  deleteDoc,
+  updateDoc,
+} from '@angular/fire/firestore';
+import { Auth, onIdTokenChanged } from '@angular/fire/auth';
 import { Contact } from '../../../interfaces/contact.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ContactService {
+  firestore: Firestore = inject(Firestore);
+  auth: Auth = inject(Auth);
+
   contact: Contact[] = [];
-  contactList: Contact[] = [];
+  contactList = signal<Contact[]>([]);
   currentIndex!: number;
   editing = false;
   detailsOpen = false;
   isAdded = false;
 
-  firestore: Firestore = inject(Firestore);
-
-  initials = "";
+  initials = '';
   contactSelected = false;
-  currentContact = {
-    surname: "",
-    lastname: "",
-    mail: "",
-    phone: "",
-    color: "",
+  currentContact: Contact = {
+    surname: '',
+    lastname: '',
+    mail: '',
+    phone: '',
+    color: '',
+    uid: '',
   };
 
   editedContact: Contact = {
-    surname: "",
-    lastname: "",
-    mail: "",
-    phone: "",
-    color: "",
-  }
+    surname: '',
+    lastname: '',
+    mail: '',
+    phone: '',
+    color: '',
+    uid: '',
+  };
 
   colors = [
     '#FF7A00',
@@ -45,39 +57,41 @@ export class ContactService {
     '#FC71FF',
     '#FFC701',
     '#0038FF',
-    '#C3FF2B',
-    '#FFE62B',
     '#FF4646',
-    '#FFBB2B'
-  ]
+    '#FFBB2B',
+  ];
 
-  unsubscribe;
+  unsubscribe: any;
 
   constructor() {
-    this.unsubscribe = onSnapshot(collection(this.firestore, "contacts"), (contactsSnapshot) => {
-      this.contactList = []
-      contactsSnapshot.forEach((contact) => {
-        this.contactList.push(this.setContactObject(contact.id, contact.data() as Contact));
-        this.sortFunc();
-      });
+    onIdTokenChanged(this.auth, (user) => {
+      if (user?.uid == null) {
+        this.unsubscribe();
+      } else {
+        this.unsubscribe = onSnapshot(
+          collection(this.firestore, 'contacts'),
+          (contactsSnapshot) => {
+            const contacts: Contact[] = [];
+            contactsSnapshot.forEach((contact) => {
+              contacts.push(this.setContactObjectSnapshot(contact.id, contact.data() as Contact));
+            });
+            this.sortFunc(contacts);
+            this.contactList.set(contacts);
+          },
+          (error) => {
+            console.error(`connection to firestore permission-denied -> ${error}`);
+          },
+        );
+      }
     });
   }
-
-  // fetchDatabase(collectionData : string, collectionArray : [], type: any){
-  //   this.unsubscribe = onSnapshot(collection(this.firestore, collectionData), (dataSnapshot) => {
-  //     collectionArray = [];
-  //     dataSnapshot.forEach((data) => {
-  //       collectionArray.push(this.setContactObject(data.id, data.data() as type))
-  //     });
-  //   });
-  // }
 
   closeDetails() {
     this.detailsOpen = false;
   }
 
-  sortFunc() {
-    this.contactList.sort((a, b) => a.lastname?.localeCompare(b.lastname));
+  sortFunc(contacts: Contact[]) {
+    contacts.sort((a, b) => a.lastname?.localeCompare(b.lastname));
   }
 
   ngOnDestroy() {
@@ -86,12 +100,16 @@ export class ContactService {
     }
   }
 
+  unsubscribeContactSnapshot() {
+    this.unsubscribe();
+  }
+
   getRandomColor() {
     let index = Math.floor(Math.random() * this.colors.length);
     return this.colors[index];
   }
 
-  setContactObject(idParam: string, obj: Contact): Contact {
+  setContactObject(idParam: string, obj: Contact, uidParam?: string | undefined): Contact {
     return {
       id: idParam,
       surname: obj.surname,
@@ -99,44 +117,60 @@ export class ContactService {
       mail: obj.mail,
       phone: obj.phone,
       color: obj.color,
-    }
+      uid: uidParam,
+    };
+  }
+
+  setContactObjectSnapshot(idParam: string, obj: Contact) {
+    return {
+      id: idParam,
+      surname: obj.surname,
+      lastname: obj.lastname,
+      mail: obj.mail,
+      phone: obj.phone,
+      color: obj.color,
+      uid: obj.uid,
+    };
   }
 
   showContactDetails($index: number) {
     this.contactSelected = false;
-    this.currentContact = this.contactList[$index];
+    this.currentContact = this.contactList()[$index];
     this.contactSelected = true;
     this.getInitials($index);
     this.currentIndex = $index;
   }
 
   getInitials($index: number) {
-    let firstInitial = this.contactList[$index].surname.trim().charAt(0).toUpperCase();
-    let secondInitial = this.contactList[$index].lastname.trim().charAt(0).toUpperCase();
+    let firstInitial = this.contactList()[$index].surname.trim().charAt(0).toUpperCase();
+    let secondInitial = this.contactList()[$index].lastname.trim().charAt(0).toUpperCase();
     this.initials = firstInitial + secondInitial;
   }
 
   editContact(index: number) {
     this.editing = true;
     this.editedContact = {
-      surname: this.contactList[index].surname,
-      lastname: this.contactList[index].lastname,
-      mail: this.contactList[index].mail,
-      phone: this.contactList[index].phone,
-      color: this.contactList[index].color,
-    }
+      surname: this.contactList()[index].surname,
+      lastname: this.contactList()[index].lastname,
+      mail: this.contactList()[index].mail,
+      phone: this.contactList()[index].phone,
+      color: this.contactList()[index].color,
+      uid: this.contactList()[index].uid,
+    };
   }
 
-  async addContactToDatabase(contact: Contact) {
-    this.isAdded = true;
-    setTimeout(()=>{
-      this.isAdded = false;
-    },3000);
-    await addDoc(collection(this.firestore, "contacts"), contact);
+  async addContactToDatabase(contact: Contact, timeOut: boolean = false) {
+    if (timeOut) {
+      this.isAdded = true;
+      setTimeout(() => {
+        this.isAdded = false;
+      }, 3000);
+    }
+    await addDoc(collection(this.firestore, 'contacts'), contact);
   }
 
   async editContactToDatabase($index: number, contact: Contact) {
-    await updateDoc(doc(this.firestore, 'contacts', this.contactList[$index].id!), {
+    await updateDoc(doc(this.firestore, 'contacts', this.contactList()[$index].id!), {
       surname: contact.surname,
       lastname: contact.lastname,
       mail: contact.mail,
@@ -148,7 +182,7 @@ export class ContactService {
   }
 
   async deleteContact($index: number) {
-    await deleteDoc(doc(this.firestore, 'contacts', this.contactList[$index].id!));
+    await deleteDoc(doc(this.firestore, 'contacts', this.contactList()[$index].id!));
     this.contactSelected = false;
     this.editing = false;
     this.detailsOpen = false;

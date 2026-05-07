@@ -18,6 +18,7 @@ export class EditContactOverlay {
     mail: '',
     phone: '',
     color: '',
+    uid: '',
   };
 
   @ViewChild('firstName') firstName!: NgModel;
@@ -25,17 +26,20 @@ export class EditContactOverlay {
   @ViewChild('mail') mail!: NgModel;
   @ViewChild('phone') phone!: NgModel;
 
-  // eigentliche Idee wäre die currentIndex variable wieder leer zu machen. Da aber eine number erwartet wird...
   saveContact() {
     if (this.checkCorrectInput()) {
       this.checkInputs();
-      this.contact_service.editContactToDatabase(this.contact_service.currentIndex, this.contact_service.editedContact);
+      this.contact_service.editContactToDatabase(
+        this.contact_service.currentIndex,
+        this.contact_service.editedContact,
+      );
       this.contact_service.editedContact = {
         surname: '',
         lastname: '',
         mail: '',
         phone: '',
         color: '',
+        uid: '',
       };
       this.contact_service.editing = false;
     }
@@ -48,6 +52,7 @@ export class EditContactOverlay {
       mail: '',
       phone: '',
       color: '',
+      uid: '',
     };
     this.contact_service.editing = false;
     this.resetForm();
@@ -61,17 +66,20 @@ export class EditContactOverlay {
   }
 
   checkInputs() {
-    this.contact_service.editedContact.surname = this.correctInput(this.contact_service.editedContact.surname);
-    this.contact_service.editedContact.lastname = this.correctInput(this.contact_service.editedContact.lastname);
+    this.contact_service.editedContact.surname = this.correctInput(
+      this.contact_service.editedContact.surname,
+    );
+    this.contact_service.editedContact.lastname = this.correctInput(
+      this.contact_service.editedContact.lastname,
+    );
   }
 
   correctInput(data: string) {
-    let cache: string = "";
+    let cache: string = '';
     for (let i = 0; i < data.length; i++) {
       if (i == 0) {
         cache += data.charAt(i).toUpperCase();
-      }
-      else {
+      } else {
         cache += data.charAt(i).toLowerCase();
       }
     }

@@ -5,7 +5,6 @@ import { AuthService } from '../../shared/services/auth/auth.service';
 import { Router } from '@angular/router';
 import { ContactService } from '../../shared/services/contact/contact.service';
 import { Auth } from '@angular/fire/auth';
-import { Contact } from '../../interfaces/contact.interface';
 
 @Component({
   selector: 'app-summary',
@@ -33,7 +32,7 @@ export class Summary {
 
   constructor() {
     effect(() => {
-      const tasks = this.boardService.taskList;
+      const tasks = this.boardService.taskList();
 
       if (tasks.length > 0) {
         this.fillTaskLists();
@@ -49,7 +48,7 @@ export class Summary {
       this.createContactObject(this.authService.currentuser);
     }
     const intervalId = setInterval(() => {
-      if (this.contactService.contactList.length > 0) {
+      if (this.contactService.contactList().length > 0) {
         this.getUserName(this.authService.currentuser);
 
         clearInterval(intervalId);
@@ -74,20 +73,20 @@ export class Summary {
     this.authService.contact.uid = this.authService.currentuser;
     this.authService.isNewUser = false;
 
-    await this.contactService.addContactToDatabase(this.authService.contact);
+    await this.contactService.addContactToDatabase(this.authService.contact, false);
   }
 
   fillTaskLists() {
     this.urgentTasks = [];
     this.mediumTasks = [];
     this.lowTasks = [];
-    for (let i = 0; i < this.boardService.taskList.length; i++) {
-      if (this.boardService.taskList[i].priority == 'Low') {
-        this.lowTasks.push(this.boardService.taskList[i]);
-      } else if (this.boardService.taskList[i].priority == 'Medium') {
-        this.mediumTasks.push(this.boardService.taskList[i]);
-      } else if (this.boardService.taskList[i].priority == 'Urgent') {
-        this.urgentTasks.push(this.boardService.taskList[i]);
+    for (let i = 0; i < this.boardService.taskList().length; i++) {
+      if (this.boardService.taskList()[i].priority == 'Low') {
+        this.lowTasks.push(this.boardService.taskList()[i]);
+      } else if (this.boardService.taskList()[i].priority == 'Medium') {
+        this.mediumTasks.push(this.boardService.taskList()[i]);
+      } else if (this.boardService.taskList()[i].priority == 'Urgent') {
+        this.urgentTasks.push(this.boardService.taskList()[i]);
       }
     }
   }
@@ -128,7 +127,7 @@ export class Summary {
 
   getTaskQuantity(type: string) {
     let counter = 0;
-    this.boardService.taskList.filter((t) => {
+    this.boardService.taskList().filter((t) => {
       if (t.columnCategory == type) {
         counter++;
       }
@@ -153,7 +152,7 @@ export class Summary {
   }
 
   getUserName(currentuser: string) {
-    this.contactService.contactList.filter((c: Contact) => {
+    this.contactService.contactList().filter((c) => {
       if (c.uid === currentuser) {
         this.authService.currentUserName = c.surname + ' ' + c.lastname;
         return;
